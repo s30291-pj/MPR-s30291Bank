@@ -30,10 +30,29 @@ public class Transaction {
 	@Deprecated
 	public Transaction() {}
 	
-	public Transaction(UUID sender, UUID recipent, double amount) {
+	public Transaction(TransactionType type, UUID sender, UUID recipent, double amount) {
 		this.sender = sender;
 		this.recipent = recipent;
 		this.amount = amount;
 	}
 	
+	public UUID getId() {
+		return id;
+	}
+	
+	public UUID getRecipent() {
+		return recipent;
+	}
+	
+	public UUID getSender() {
+		return sender;
+	}
+	
+	public double getAmount() {
+		return amount;
+	}
+	
+	public LocalDate getTimestamp() {
+		return timestamp;
+	}
 }
