@@ -20,11 +20,4 @@ public class TransactionServiceTest {
 	@Mock
 	private AccountService accounts;
 	
-	public void withdrawal() {
-		
-		
-	}
-	
-	
-	
 }
