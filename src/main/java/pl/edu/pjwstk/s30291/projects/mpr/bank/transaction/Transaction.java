@@ -40,7 +40,7 @@ public class Transaction {
 	}
 	
 	public void reject(String message) {
-		this.status = TransactionStatus.REJECTED;
+		this.status = TransactionStatus.DECLINED;
 		this.message = message;
 	}
 	

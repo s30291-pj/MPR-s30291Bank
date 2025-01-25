@@ -5,12 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import pl.edu.pjwstk.s30291.projects.mpr.bank.account.Account;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.account.service.AccountService;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.Transaction;
-import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionAmountIncorrectException;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionNotFoundException;
-import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionReceiverNotFoundException;
-import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionSenderNotFoundException;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.repository.TransactionRepository;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.type.TransactionType;
 
@@ -41,9 +39,11 @@ public class TransactionService {
 	}
 	
 	private Transaction create(TransactionType type, UUID sender, UUID receiver, double amount) {	
-		process();
+		Transaction transaction = transactions.save(new Transaction(type, sender, receiver, amount));
 		
-		return transactions.save(new Transaction(type, sender, receiver, amount));
+		process(transaction);
+		
+		return transactions.save(transaction);
 	}
 	
 	private void process(Transaction transaction) {
@@ -54,7 +54,17 @@ public class TransactionService {
 		if(amount < 0) transaction.reject("Transaction amount incorrect!");
 		else if(!accounts.exists(sender)) transaction.reject("Sender account not found!");
 		else if(!accounts.exists(recipent)) transaction.reject("Recipent account not found!");
-		else transaction.accept();
+		else {
+			Account senderAccount = accounts.fetch(sender);
+			Account recipentAccount = accounts.fetch(recipent);
+			
+			if(!senderAccount.hasEnough(amount)) transaction.reject("Sender balance is not sufficient!");
+			else {
+				senderAccount.removeBalance(amount);
+				recipentAccount.addBalance(amount);
+				transaction.accept();
+			}
+		}
 		
 		transactions.save(transaction);
 	}

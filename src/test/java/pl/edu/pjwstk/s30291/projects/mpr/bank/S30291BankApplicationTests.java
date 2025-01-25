@@ -8,6 +8,7 @@ class S30291BankApplicationTests {
 
 	@Test
 	void contextLoads() {
+		
 	}
 
 }
