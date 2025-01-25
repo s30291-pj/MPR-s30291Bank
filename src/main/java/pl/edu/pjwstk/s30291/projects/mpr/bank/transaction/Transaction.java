@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.TransactionException;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.status.TransactionStatus;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.type.TransactionType;
 
@@ -27,6 +28,8 @@ public class Transaction {
 	
 	private LocalDate timestamp = LocalDate.now();
 	
+	private String message = "Transaction is pending!";
+	
 	@Deprecated
 	public Transaction() {}
 	
@@ -34,6 +37,16 @@ public class Transaction {
 		this.sender = sender;
 		this.recipent = recipent;
 		this.amount = amount;
+	}
+	
+	public void reject(String message) {
+		this.status = TransactionStatus.REJECTED;
+		this.message = message;
+	}
+	
+	public void accept() {
+		this.status = TransactionStatus.ACCEPTED;
+		this.message = "Transaction was procced!";
 	}
 	
 	public UUID getId() {
@@ -55,4 +68,9 @@ public class Transaction {
 	public LocalDate getTimestamp() {
 		return timestamp;
 	}
+	
+	public String getMessage() {
+		return message;
+	}
+
 }

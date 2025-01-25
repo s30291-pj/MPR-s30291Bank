@@ -1,11 +1,16 @@
 package pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import pl.edu.pjwstk.s30291.projects.mpr.bank.account.service.AccountService;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.Transaction;
+import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionAmountIncorrectException;
+import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionNotFoundException;
+import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionReceiverNotFoundException;
+import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.exception.impl.TransactionSenderNotFoundException;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.repository.TransactionRepository;
 import pl.edu.pjwstk.s30291.projects.mpr.bank.transaction.type.TransactionType;
 
@@ -35,7 +40,30 @@ public class TransactionService {
 		return create(TransactionType.WITHDRAWAL, sender, receiver, amount);
 	}
 	
-	private Transaction create(TransactionType type, UUID sender, UUID receiver, double amount) {
+	private Transaction create(TransactionType type, UUID sender, UUID receiver, double amount) {	
+		process();
+		
 		return transactions.save(new Transaction(type, sender, receiver, amount));
+	}
+	
+	private void process(Transaction transaction) {
+		UUID sender = transaction.getSender();
+		UUID recipent = transaction.getRecipent();
+		double amount = transaction.getAmount();
+		
+		if(amount < 0) transaction.reject("Transaction amount incorrect!");
+		else if(!accounts.exists(sender)) transaction.reject("Sender account not found!");
+		else if(!accounts.exists(recipent)) transaction.reject("Recipent account not found!");
+		else transaction.accept();
+		
+		transactions.save(transaction);
+	}
+	
+	public Transaction fetch(UUID id) {
+		Optional<Transaction> transaction = transactions.findById(id);
+
+		if(!transaction.isPresent()) throw new TransactionNotFoundException();
+		
+		return transaction.get();
 	}
 }
